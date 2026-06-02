@@ -1,38 +1,878 @@
-HTML
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-    <title>Galeri Foto Drive Saya</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DriveGallery - Galeri Foto Google Drive (Tanpa API Key)</title>
+    <!-- Tailwind CSS untuk Desain Premium -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
-        .gallery img { width: 100%; height: auto; border-radius: 8px; }
+        /* Transisi Halus */
+        .smooth-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        /* Grid Masonry Alternatif */
+        .masonry-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-auto-rows: 10px;
+        }
+        .masonry-item {
+            grid-row-end: span 26;
+        }
+        .masonry-item.landscape {
+            grid-row-end: span 20;
+        }
+        .masonry-item.portrait {
+            grid-row-end: span 32;
+        }
     </style>
 </head>
-<body>
-    <h1>Koleksi Foto</h1>
-    <div id="gallery" class="gallery">
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen smooth-transition font-sans">
+
+    <!-- HEADER / NAVIGASI -->
+    <header class="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 smooth-transition">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <!-- Logo Icon -->
+                <div class="p-2.5 bg-brand-500 rounded-xl text-white shadow-lg shadow-brand-500/30">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+                        DriveGallery
+                        <span class="text-xs font-semibold px-2 py-0.5 bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300 rounded-full">v2.0</span>
+                    </h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Pemandang Foto Google Drive Instan</p>
+                </div>
+            </div>
+
+            <!-- Kontrol Utama -->
+            <div class="flex items-center space-x-2">
+                <!-- Mode Tema (Gelap/Terang) -->
+                <button id="themeToggle" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 smooth-transition" title="Ubah Tema">
+                    <!-- Sun Icon (Light) -->
+                    <svg id="sunIcon" class="w-5 h-5 text-amber-500 hidden" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 2.293a1 1 0 011.414 0l.707.707a1 1 0 01-1.414 1.414l-.707-.707a1 1 0 010-1.414zM17.707 9.293a1 1 0 010 1.414l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 0zM14 15.707a1 1 0 011.414 0l.707.707a1 1 0 01-1.414 1.414l-.707-.707a1 1 0 010-1.414zm-9-1.414l.707-.707a1 1 0 011.414 1.414l-.707.707a1 1 0 01-1.414-1.414zM2 10a1 1 0 011-1h1a1 1 0 110 2H3a1 1 0 01-1-1zm2-5.707a1 1 0 010-1.414l.707-.707a1 1 0 111.414 1.414l-.707.707a1 1 0 01-1.414 0zM10 14a4 4 0 100-8 4 4 0 000 8z" />
+                    </svg>
+                    <!-- Moon Icon (Dark) -->
+                    <svg id="moonIcon" class="w-5 h-5 text-slate-600 dark:text-slate-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                    </svg>
+                </button>
+
+                <!-- Tombol Konfigurasi API / Settings -->
+                <button id="settingsBtn" class="flex items-center space-x-1.5 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 smooth-transition font-medium text-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span>ID Folder</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- HEADER HERO SECTION -->
+        <div class="bg-gradient-to-r from-brand-600 to-indigo-700 rounded-3xl p-6 sm:p-10 text-white shadow-2xl shadow-brand-500/10 mb-8 relative overflow-hidden">
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.15),transparent)] pointer-events-none"></div>
+            <div class="relative z-10 max-w-2xl">
+                <div class="inline-flex items-center space-x-2 px-3 py-1 bg-white/15 backdrop-blur-md rounded-full text-xs font-semibold tracking-wider uppercase mb-4">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" id="statusBadgeDot"></span>
+                    <span id="statusBadge">Mode Demo Aktif</span>
+                </div>
+                <h2 class="text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight">
+                    Galeri Gambar Google Drive Anda
+                </h2>
+                <p class="mt-2 text-white/80 text-sm sm:text-base leading-relaxed">
+                    Menampilkan seluruh isi dokumen foto dari folder secara otomatis tanpa menggunakan API Key Google Cloud Console.
+                </p>
+                <div class="mt-6 flex flex-wrap gap-2 items-center text-xs text-white/95 bg-black/20 backdrop-blur-sm p-3 rounded-xl border border-white/10 w-fit">
+                    <span class="font-bold opacity-75">Folder ID saat ini:</span>
+                    <code class="bg-white/20 px-2 py-1 rounded font-mono select-all text-brand-100 break-all" id="currentFolderIdDisplay">1M6s_QmybaYkbiUpebeXIY2Nv9IYzxH0P</code>
+                </div>
+            </div>
         </div>
 
-    <script>
-        const API_KEY = 'YOUR_API_KEY';
-        const FOLDER_ID = '1M6s_QmybaYkbiUpebeXIY2Nv9IYzxH0P';
+        <!-- PETUNJUK INTEGRASI DRIVE -->
+        <div id="tutorialSection" class="bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 mb-8 smooth-transition">
+            <div class="flex items-start justify-between">
+                <div class="flex items-start space-x-3">
+                    <div class="p-2 bg-emerald-100 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 rounded-xl mt-0.5">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900 dark:text-white">Bagaimana cara menampilkan foto asli dari folder Google Drive Anda?</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                            Web ini membaca berkas langsung secara cerdas dari folder publik. Anda hanya perlu memastikan:
+                        </p>
+                        <ol class="list-decimal list-inside text-xs text-slate-600 dark:text-slate-300 mt-2 space-y-1.5 pl-1">
+                            <li>Ubah hak akses folder Anda di Google Drive menjadi <span class="font-semibold text-brand-600 dark:text-brand-400">"Siapa saja yang memiliki link dapat melihat" (Public)</span>.</li>
+                            <li>Buka menu <span class="font-semibold underline cursor-pointer" onclick="openSettings()">Pengaturan Folder</span> di kanan atas, matikan "Mode Demo" dan simpan ID Folder Anda.</li>
+                        </ol>
+                    </div>
+                </div>
+                <button onclick="document.getElementById('tutorialSection').remove()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+        </div>
 
-        // Fungsi untuk mengambil data file dari API Google Drive
-        async function fetchPhotos() {
-            const url = `https://www.googleapis.com/drive/v3/files?q='${FOLDER_ID}'+in+parents+and+mimeType+contains+'image/'&key=${API_KEY}&fields=files(id,name)`;
+        <!-- TOOLBAR / FILTER & KONTROL -->
+        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4 smooth-transition shadow-sm">
+            <!-- Sisi Kiri: Cari dan Filter Kategori -->
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
+                <!-- Search Input -->
+                <div class="relative flex-1 max-w-md">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </span>
+                    <input type="text" id="searchInput" placeholder="Cari nama foto..." class="w-full pl-9 pr-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none text-sm transition text-slate-800 dark:text-white">
+                </div>
+
+                <!-- Filter Tipe -->
+                <div class="flex items-center space-x-1 bg-slate-100 dark:bg-slate-900 p-1 rounded-xl border border-slate-200/50 dark:border-slate-700/50">
+                    <button onclick="filterPhotos('all')" id="filter-all" class="filter-btn px-4 py-1.5 rounded-lg text-xs font-semibold bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 shadow-sm transition">
+                        Semua (<span id="count-all">0</span>)
+                    </button>
+                    <button onclick="filterPhotos('landscape')" id="filter-landscape" class="filter-btn px-4 py-1.5 rounded-lg text-xs font-semibold text-slate-500 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-800/50 transition">
+                        Landscape
+                    </button>
+                    <button onclick="filterPhotos('portrait')" id="filter-portrait" class="filter-btn px-4 py-1.5 rounded-lg text-xs font-semibold text-slate-500 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-800/50 transition">
+                        Portrait
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sisi Kanan: Pengurutan & Pilihan Layout Grid -->
+            <div class="flex items-center justify-between sm:justify-end gap-4 border-t pt-3 md:border-t-0 md:pt-0 border-slate-200 dark:border-slate-700">
+                <!-- Urutkan -->
+                <div class="flex items-center space-x-2">
+                    <span class="text-xs text-slate-500 dark:text-slate-400">Urutkan:</span>
+                    <select id="sortSelect" onchange="sortPhotos(this.value)" class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl py-2 px-3 text-xs font-semibold outline-none focus:ring-2 focus:ring-brand-500 transition">
+                        <option value="name-asc">Nama (A - Z)</option>
+                        <option value="name-desc">Nama (Z - A)</option>
+                    </select>
+                </div>
+
+                <!-- Layout Switcher -->
+                <div class="flex items-center bg-slate-100 dark:bg-slate-900 p-1 rounded-xl border border-slate-200/50 dark:border-slate-700/50">
+                    <!-- Grid Standard -->
+                    <button onclick="changeLayout('grid')" id="layout-grid" class="layout-btn p-2 rounded-lg bg-white dark:bg-slate-800 text-brand-500 dark:text-brand-400 shadow-sm transition" title="Grid Seimbang">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                        </svg>
+                    </button>
+                    <!-- Masonry Grid -->
+                    <button onclick="changeLayout('masonry')" id="layout-masonry" class="layout-btn p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-800/50 transition" title="Tinggi Dinamis">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h3a1 1 0 011 1v12a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM11 5a1 1 0 011-1h3a1 1 0 011 1v6a1 1 0 01-1 1h-3a1 1 0 01-1-1V5zM18 5a1 1 0 011-1h3a1 1 0 011 1v8a1 1 0 01-1 1h-3a1 1 0 01-1-1V5z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- EMPTY STATE / NOTIFIKASI ERROR -->
+        <div id="errorAlert" class="hidden mb-8 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 p-4 rounded-2xl flex items-start space-x-3 text-red-800 dark:text-red-400">
+            <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+            <div>
+                <span class="font-bold block" id="errorTitle">Kesalahan Sambungan</span>
+                <span id="errorMessage" class="text-sm">Silakan periksa kembali ID Folder Google Drive Anda atau ubah status folder menjadi Publik.</span>
+            </div>
+        </div>
+
+        <!-- SKELETON LOADING -->
+        <div id="loadingGrid" class="hidden grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-3 border border-slate-200 dark:border-slate-800 animate-pulse">
+                <div class="bg-slate-200 dark:bg-slate-700 h-48 rounded-xl mb-3"></div>
+                <div class="h-4 bg-slate-200 dark:bg-slate-700 rounded-md w-3/4 mb-2"></div>
+                <div class="h-3 bg-slate-200 dark:bg-slate-700 rounded-md w-1/2"></div>
+            </div>
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-3 border border-slate-200 dark:border-slate-800 animate-pulse">
+                <div class="bg-slate-200 dark:bg-slate-700 h-48 rounded-xl mb-3"></div>
+                <div class="h-4 bg-slate-200 dark:bg-slate-700 rounded-md w-3/4 mb-2"></div>
+                <div class="h-3 bg-slate-200 dark:bg-slate-700 rounded-md w-1/2"></div>
+            </div>
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-3 border border-slate-200 dark:border-slate-800 animate-pulse">
+                <div class="bg-slate-200 dark:bg-slate-700 h-48 rounded-xl mb-3"></div>
+                <div class="h-4 bg-slate-200 dark:bg-slate-700 rounded-md w-3/4 mb-2"></div>
+                <div class="h-3 bg-slate-200 dark:bg-slate-700 rounded-md w-1/2"></div>
+            </div>
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-3 border border-slate-200 dark:border-slate-800 animate-pulse">
+                <div class="bg-slate-200 dark:bg-slate-700 h-48 rounded-xl mb-3"></div>
+                <div class="h-4 bg-slate-200 dark:bg-slate-700 rounded-md w-3/4 mb-2"></div>
+                <div class="h-3 bg-slate-200 dark:bg-slate-700 rounded-md w-1/2"></div>
+            </div>
+        </div>
+
+        <!-- MAIN GALLERY CONTAINER -->
+        <div id="galleryContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Kartu-kartu foto di-generate secara dinamis di sini -->
+        </div>
+
+        <!-- EMPTY RESULTS STATE -->
+        <div id="emptyState" class="hidden text-center py-20 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-800 p-8">
+            <svg class="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            <h4 class="text-lg font-bold text-slate-800 dark:text-slate-200">Tidak ada foto yang ditemukan</h4>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-md mx-auto">Kami tidak dapat menemukan foto dengan kriteria pencarian atau filter Anda saat ini. Pastikan folder tidak kosong.</p>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-slate-200 dark:border-slate-800 mt-16 py-8 text-center text-xs text-slate-500 dark:text-slate-400 smooth-transition">
+        <p>© 2026 DriveGallery. Desain Premium Terintegrasi Google Drive Scraper.</p>
+        <p class="mt-1">Dibuat khusus untuk kenyamanan eksplorasi visual Anda tanpa kunci API.</p>
+    </footer>
+
+    <!-- SETTINGS MODAL -->
+    <div id="settingsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-lg p-6 shadow-2xl border border-slate-100 dark:border-slate-700/50 transform translate-y-4 transition-transform duration-300" id="settingsContent">
+            <div class="flex items-center justify-between mb-5">
+                <div class="flex items-center space-x-2">
+                    <div class="p-2 bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-white rounded-xl">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-extrabold text-slate-900 dark:text-white">Pengaturan Folder</h3>
+                </div>
+                <button onclick="closeSettings()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <!-- Input Folder ID -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">ID Folder Google Drive</label>
+                    <input type="text" id="folderIdInput" class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none transition text-sm font-semibold" placeholder="Masukkan ID Folder Anda">
+                    <p class="text-[11px] text-slate-400 dark:text-slate-400 mt-1">Gunakan kode unik di akhir tautan folder Google Drive Anda.</p>
+                </div>
+
+                <!-- Toggle Demo Mode -->
+                <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200/50 dark:border-slate-700/50">
+                    <div>
+                        <span class="block text-xs font-bold text-slate-800 dark:text-slate-200">Gunakan Mode Demo</span>
+                        <span class="text-[10px] text-slate-400">Aktifkan untuk melihat galeri sampel yang indah.</span>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="demoModeToggle" class="sr-only peer">
+                        <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white  after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-brand-500"></div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Footer Modal -->
+            <div class="mt-6 flex space-x-3 justify-end">
+                <button onclick="closeSettings()" class="px-5 py-2.5 text-xs font-bold text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition">Batal</button>
+                <button onclick="saveSettings()" class="px-5 py-2.5 bg-brand-500 hover:bg-brand-600 text-white font-bold rounded-xl text-xs transition shadow-lg shadow-brand-500/20">Terapkan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LIGHTBOX / FULL SCREEN IMAGE VIEWER -->
+    <div id="lightbox" class="fixed inset-0 z-50 bg-black/95 flex flex-col md:flex-row hidden opacity-0 transition-opacity duration-300">
+        <!-- Main Content -->
+        <div class="flex-1 flex items-center justify-center relative p-4 h-3/4 md:h-full">
+            <button onclick="closeLightbox()" class="absolute top-4 right-4 z-50 p-2.5 bg-white/10 hover:bg-white/20 text-white rounded-full transition" title="Tutup">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+
+            <!-- Navigasi Kiri -->
+            <button onclick="prevPhoto()" class="absolute left-4 p-3 bg-white/10 hover:bg-white/20 text-white rounded-full transition group z-40" title="Sebelumnya">
+                <svg class="w-6 h-6 transform group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+            </button>
+
+            <!-- Gambar Inti -->
+            <img id="lightboxImg" class="max-w-full max-h-full object-contain rounded-lg shadow-2xl transition-transform duration-300" src="" alt="Main Preview">
+
+            <!-- Navigasi Kanan -->
+            <button onclick="nextPhoto()" class="absolute right-4 p-3 bg-white/10 hover:bg-white/20 text-white rounded-full transition group z-40" title="Selanjutnya">
+                <svg class="w-6 h-6 transform group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+            </button>
+
+            <!-- Indikator Slide -->
+            <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 px-3 py-1 bg-white/15 backdrop-blur-md rounded-full text-xs font-semibold text-white">
+                <span id="lightboxIndex">1</span> / <span id="lightboxTotal">12</span>
+            </div>
+        </div>
+
+        <!-- Sidebar Informasi -->
+        <div class="w-full md:w-80 bg-slate-900 border-t md:border-t-0 md:border-l border-slate-800 p-6 flex flex-col justify-between text-white">
+            <div class="space-y-4">
+                <span class="inline-flex items-center px-2 py-0.5 bg-brand-500/10 text-brand-400 border border-brand-500/30 rounded-md text-[10px] font-bold uppercase tracking-wider">Detail Gambar</span>
+                <h4 id="lightboxTitle" class="text-lg font-bold leading-snug break-words">Nama Foto Google Drive.jpg</h4>
+                
+                <div class="space-y-2 border-t border-slate-800 pt-3 text-xs">
+                    <div class="flex justify-between py-1">
+                        <span class="text-slate-400">Orientasi</span>
+                        <span class="font-semibold" id="lightboxAspect">Landscape</span>
+                    </div>
+                    <div class="flex justify-between py-1">
+                        <span class="text-slate-400">Tautan Langsung</span>
+                        <span class="font-semibold text-brand-400 hover:underline cursor-pointer select-all" id="lightboxDirectLink">Salin Tautan</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tombol Aksi -->
+            <div class="mt-6 space-y-2 border-t border-slate-800 pt-4">
+                <a id="driveLinkBtn" href="#" target="_blank" class="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-white hover:bg-slate-100 text-slate-900 font-bold rounded-xl text-sm transition shadow-lg">
+                    <svg class="w-4 h-4 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                    <span>Buka Berkas Asli</span>
+                </a>
+                <button onclick="closeLightbox()" class="w-full px-4 py-3 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white font-bold rounded-xl text-xs transition">
+                    Kembali ke Galeri
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFIKASI TOAST CUSTOM -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 bg-slate-900 text-white px-5 py-3 rounded-2xl flex items-center space-x-2.5 shadow-2xl transition-all duration-300 translate-y-20 opacity-0 pointer-events-none">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span id="toastMessage" class="text-xs font-semibold">Tindakan berhasil!</span>
+    </div>
+
+    <!-- SCRIPT UTAMA GALERI -->
+    <script>
+        // DATA PENYIMPANAN STATE APLIKASI
+        let state = {
+            folderId: '1M6s_QmybaYkbiUpebeXIY2Nv9IYzxH0P',
+            isDemo: false, // Default memuat foto asli dari Google Drive Anda
+            theme: 'light',
+            viewLayout: 'grid',
+            searchQuery: '',
+            activeFilter: 'all',
+            activeSort: 'name-asc',
+            photos: [],
+            filteredPhotos: [],
+            currentPhotoIndex: 0
+        };
+
+        // KOLEKSI FOTO DEMO JIKA INGIN DIWARNAI SAMPEL
+        const demoPhotos = [
+            { id: 'demo1', name: 'Matahari Terbit di Pegunungan Bromo.jpg', src: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&auto=format&fit=crop&q=80', thumb: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=400&auto=format&fit=crop&q=80', aspect: 'landscape', size: '3.4 MB' },
+            { id: 'demo2', name: 'Suasana Hijau Tebing Danau Toba.jpg', src: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800&auto=format&fit=crop&q=80', thumb: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=400&auto=format&fit=crop&q=80', aspect: 'landscape', size: '2.1 MB' },
+            { id: 'demo3', name: 'Jalur Pedestrian Hutan Bambu.jpg', src: 'https://images.unsplash.com/photo-1500627869374-13cd993b1115?w=800&auto=format&fit=crop&q=80', thumb: 'https://images.unsplash.com/photo-1500627869374-13cd993b1115?w=400&auto=format&fit=crop&q=80', aspect: 'portrait', size: '4.7 MB' },
+            { id: 'demo4', name: 'Keindahan Pantai Pasir Putih Bali.jpg', src: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&auto=format&fit=crop&q=80', thumb: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&auto=format&fit=crop&q=80', aspect: 'landscape', size: '1.8 MB' },
+            { id: 'demo5', name: 'Pohon Pinus di Embun Pagi Bandung.jpg', src: 'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=800&auto=format&fit=crop&q=80', thumb: 'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=400&auto=format&fit=crop&q=80', aspect: 'landscape', size: '3.1 MB' },
+            { id: 'demo6', name: 'Detail Air Terjun Tersembunyi.jpg', src: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&auto=format&fit=crop&q=80', thumb: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&auto=format&fit=crop&q=80', aspect: 'portrait', size: '5.2 MB' },
+            { id: 'demo7', name: 'Sawah Berundak Ubud Bali.jpg', src: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=800&auto=format&fit=crop&q=80', thumb: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=400&auto=format&fit=crop&q=80', aspect: 'portrait', size: '2.8 MB' },
+            { id: 'demo8', name: 'Pesona Alam Pulau Labuan Bajo.jpg', src: 'https://images.unsplash.com/photo-1472214222541-d510753a4707?w=800&auto=format&fit=crop&q=80', thumb: 'https://images.unsplash.com/photo-1472214222541-d510753a4707?w=400&auto=format&fit=crop&q=80', aspect: 'landscape', size: '3.9 MB' }
+        ];
+
+        // INISIALISASI
+        window.addEventListener('DOMContentLoaded', () => {
+            loadSavedConfig();
+            applyTheme();
+            setupKeyboardNavigation();
+            loadContent();
+        });
+
+        // LOAD KONFIGURASI DARI LOCALSTORAGE
+        function loadSavedConfig() {
+            const savedFolderId = localStorage.getItem('drive_folder_id');
+            const savedDemoMode = localStorage.getItem('drive_demo_mode');
+            const savedTheme = localStorage.getItem('drive_theme');
+
+            if (savedFolderId) state.folderId = savedFolderId;
+            if (savedTheme) state.theme = savedTheme;
             
-            const response = await fetch(url);
-            const data = await response.json();
+            if (savedDemoMode !== null) {
+                state.isDemo = savedDemoMode === 'true';
+            } else {
+                // Default memuat berkas real Anda
+                state.isDemo = false;
+            }
+
+            document.getElementById('folderIdInput').value = state.folderId;
+            document.getElementById('demoModeToggle').checked = state.isDemo;
+            document.getElementById('currentFolderIdDisplay').textContent = state.folderId;
+        }
+
+        // FUNGSI LOAD KONTEN UTAMA
+        async function loadContent() {
+            document.getElementById('errorAlert').classList.add('hidden');
             
-            const gallery = document.getElementById('gallery');
-            data.files.forEach(file => {
-                const img = document.createElement('img');
-                // Link khusus untuk menampilkan thumbnail/gambar langsung
-                img.src = `https://lh3.googleusercontent.com/u/0/d/${file.id}`;
-                gallery.appendChild(img);
+            if (state.isDemo) {
+                state.photos = [...demoPhotos];
+                document.getElementById('statusBadge').innerHTML = 'Mode Demo Aktif';
+                document.getElementById('statusBadgeDot').className = "w-2 h-2 rounded-full bg-amber-400 animate-pulse";
+                processAndRenderPhotos();
+            } else {
+                document.getElementById('statusBadge').innerHTML = 'Menghubungkan Google Drive...';
+                document.getElementById('statusBadgeDot').className = "w-2 h-2 rounded-full bg-blue-400 animate-pulse";
+                await fetchPhotosFromDriveNoKey();
+            }
+        }
+
+        // AMBIL GAMBAR DARI FOLDER PUBLIK GOOGLE DRIVE TANPA API KEY
+        async function fetchPhotosFromDriveNoKey() {
+            const galleryContainer = document.getElementById('galleryContainer');
+            const loadingGrid = document.getElementById('loadingGrid');
+            const emptyState = document.getElementById('emptyState');
+
+            galleryContainer.classList.add('hidden');
+            loadingGrid.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+
+            const folderId = state.folderId;
+            // Target halaman embedded view publik
+            const targetUrl = `https://drive.google.com/embeddedfolderview?id=${folderId}`;
+            // Menggunakan proxy CORS publik AllOrigins yang aman dan andal
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+
+            try {
+                const response = await fetch(proxyUrl);
+                if (!response.ok) throw new Error('Gagal menghubungi proxy CORS AllOrigins.');
+                
+                const data = await response.json();
+                const htmlString = data.contents;
+
+                if (!htmlString) {
+                    throw new Error('Tidak ada konten data yang diterima dari proxy.');
+                }
+
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(htmlString, 'text/html');
+                
+                const extractedPhotos = [];
+
+                // Metode 1: Mencari elemen baris data entry terstruktur
+                const entries = doc.querySelectorAll('.entry, [id^="entry-"], .grid-entry');
+                entries.forEach(entry => {
+                    const link = entry.querySelector('a[href*="/file/d/"]');
+                    const nameEl = entry.querySelector('.name, .title, span');
+                    if (link) {
+                        const href = link.getAttribute('href');
+                        const match = /\/file\/d\/([a-zA-Z0-9_-]+)/.exec(href);
+                        if (match) {
+                            const id = match[1];
+                            let name = nameEl ? nameEl.textContent.trim() : '';
+                            if (!name) {
+                                name = link.getAttribute('title') || link.getAttribute('aria-label') || 'Foto_' + id.substring(0, 5);
+                            }
+                            extractedPhotos.push({ id, name });
+                        }
+                    }
+                });
+
+                // Metode 2 (Fallback): Mencari langsung semua link file di halaman
+                if (extractedPhotos.length === 0) {
+                    const links = doc.querySelectorAll('a[href*="/file/d/"]');
+                    links.forEach(link => {
+                        const href = link.getAttribute('href');
+                        const match = /\/file\/d\/([a-zA-Z0-9_-]+)/.exec(href);
+                        if (match) {
+                            const id = match[1];
+                            let name = link.getAttribute('title') || link.getAttribute('aria-label') || link.textContent.trim();
+                            if (!name || name === 'View' || name === 'Buka' || name.includes('drive.google.com')) {
+                                name = 'Gambar ' + id.substring(0, 5);
+                            }
+                            if (!extractedPhotos.some(p => p.id === id)) {
+                                extractedPhotos.push({ id, name });
+                            }
+                        }
+                    });
+                }
+
+                // Metode 3 (Fallback Ekstrim): Mencari kecocokan Array JavaScript di tag script
+                if (extractedPhotos.length === 0) {
+                    const regex = /"([a-zA-Z0-9_-]{28,35})",\s*"([^"]+)"/g;
+                    let match;
+                    while ((match = regex.exec(htmlString)) !== null) {
+                        const id = match[1];
+                        const name = match[2];
+                        if (name && !name.startsWith('http') && !extractedPhotos.some(p => p.id === id)) {
+                            extractedPhotos.push({ id, name });
+                        }
+                    }
+                }
+
+                if (extractedPhotos.length === 0) {
+                    showError('Folder Tidak Dapat Dibaca', 'Pastikan pengaturan share folder Anda diatur ke "Siapa saja yang memiliki link dapat melihat" dan ID folder sudah benar.');
+                    state.photos = [];
+                    emptyState.classList.remove('hidden');
+                    return;
+                }
+
+                // Map data hasil ekstraksi ke state
+                state.photos = extractedPhotos.map(photo => {
+                    return {
+                        id: photo.id,
+                        name: photo.name,
+                        // LH3 endpoint ideal: w1200 untuk lightbox jernih, w400 untuk load grid cepat
+                        src: `https://lh3.googleusercontent.com/d/${photo.id}=w1200`,
+                        thumb: `https://lh3.googleusercontent.com/d/${photo.id}=w400`,
+                        aspect: 'landscape', // Dinamis dideteksi saat runtime image load
+                        size: 'Aktif',
+                        createdTime: new Date().toISOString(),
+                        webContentLink: `https://drive.google.com/uc?export=view&id=${photo.id}`
+                    };
+                });
+
+                document.getElementById('statusBadge').innerHTML = `Terhubung: ${state.photos.length} Foto`;
+                document.getElementById('statusBadgeDot').className = "w-2 h-2 rounded-full bg-green-500 animate-pulse";
+                processAndRenderPhotos();
+
+            } catch (err) {
+                console.error(err);
+                showError('Koneksi Gagal', 'Sistem tidak dapat mengunduh data folder publik melalui proxy. Coba muat ulang atau periksa status koneksi internet.');
+                state.photos = [];
+                emptyState.classList.remove('hidden');
+            } finally {
+                loadingGrid.classList.add('hidden');
+            }
+        }
+
+        // PROSES FILTER & SORTING
+        function processAndRenderPhotos() {
+            let result = [...state.photos];
+            
+            if (state.searchQuery.trim() !== '') {
+                const query = state.searchQuery.toLowerCase();
+                result = result.filter(photo => photo.name.toLowerCase().includes(query));
+            }
+
+            if (state.activeFilter !== 'all') {
+                result = result.filter(photo => photo.aspect === state.activeFilter);
+            }
+
+            if (state.activeSort === 'name-asc') {
+                result.sort((a, b) => a.name.localeCompare(b.name));
+            } else if (state.activeSort === 'name-desc') {
+                result.sort((a, b) => b.name.localeCompare(a.name));
+            }
+
+            state.filteredPhotos = result;
+            document.getElementById('count-all').textContent = state.photos.length;
+            renderGallery();
+        }
+
+        // RENDER GRID KE DOM
+        function renderGallery() {
+            const container = document.getElementById('galleryContainer');
+            const emptyState = document.getElementById('emptyState');
+
+            container.innerHTML = '';
+
+            if (state.filteredPhotos.length === 0) {
+                container.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            container.classList.remove('hidden');
+
+            if (state.viewLayout === 'masonry') {
+                container.className = "masonry-grid gap-4";
+            } else {
+                container.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6";
+            }
+
+            state.filteredPhotos.forEach((photo, index) => {
+                const card = document.createElement('div');
+                
+                if (state.viewLayout === 'masonry') {
+                    card.className = `masonry-item ${photo.aspect} bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl border border-slate-200/50 dark:border-slate-800 group relative cursor-pointer smooth-transition mb-4`;
+                } else {
+                    card.className = `bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl border border-slate-200/50 dark:border-slate-800 group relative cursor-pointer smooth-transition h-fit`;
+                }
+
+                card.onclick = () => openLightbox(index);
+
+                card.innerHTML = `
+                    <div class="relative overflow-hidden aspect-video ${photo.aspect === 'portrait' && state.viewLayout !== 'masonry' ? 'aspect-[3/4]' : ''} bg-slate-100 dark:bg-slate-900">
+                        <!-- Img Element dengan Detektor Orientasi Dinamis -->
+                        <img src="${photo.thumb || photo.src}" alt="${photo.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" onload="detectOrientation(this, '${photo.id}', ${index})">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-white text-xs font-semibold px-2 py-1 bg-white/20 backdrop-blur-sm rounded-lg">Buka Detail</span>
+                                <div class="p-1.5 bg-brand-500 rounded-lg text-white">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h4 class="text-sm font-bold text-slate-800 dark:text-slate-200 truncate group-hover:text-brand-500 transition-colors" title="${photo.name}">${photo.name}</h4>
+                        <div class="flex items-center justify-between mt-2 text-xs text-slate-400">
+                            <span class="text-[10px] uppercase font-bold text-slate-400">Dimensi</span>
+                            <span class="capitalize text-[10px] px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700/50 rounded-md font-semibold text-slate-500 dark:text-slate-400" id="badge-aspect-${photo.id}">${photo.aspect}</span>
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(card);
             });
         }
-        fetchPhotos();
+
+        // DETEKSI RASIO GAMBAR DINAMIS PADA RUNTIME SAAT GAMBAR BERHASIL DIMUAT
+        function detectOrientation(imgEl, id, index) {
+            const width = imgEl.naturalWidth;
+            const height = imgEl.naturalHeight;
+            const detectedAspect = width < height ? 'portrait' : 'landscape';
+            
+            // Perbarui Data State
+            const origPhoto = state.photos.find(p => p.id === id);
+            if (origPhoto && origPhoto.aspect !== detectedAspect) {
+                origPhoto.aspect = detectedAspect;
+                
+                // Perbarui badge teks di DOM secara langsung tanpa reload grid total
+                const badge = document.getElementById(`badge-aspect-${id}`);
+                if (badge) {
+                    badge.textContent = detectedAspect;
+                }
+            }
+        }
+
+        // EVENTS FILTER & KONTROL
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            state.searchQuery = e.target.value;
+            processAndRenderPhotos();
+        });
+
+        function filterPhotos(aspect) {
+            state.activeFilter = aspect;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.className = "filter-btn px-4 py-1.5 rounded-lg text-xs font-semibold text-slate-500 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-800/50 transition";
+            });
+
+            const activeBtn = document.getElementById(`filter-${aspect}`);
+            if (activeBtn) {
+                activeBtn.className = "filter-btn px-4 py-1.5 rounded-lg text-xs font-semibold bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 shadow-sm transition";
+            }
+            processAndRenderPhotos();
+        }
+
+        function sortPhotos(sortValue) {
+            state.activeSort = sortValue;
+            processAndRenderPhotos();
+        }
+
+        function changeLayout(layout) {
+            state.viewLayout = layout;
+            document.querySelectorAll('.layout-btn').forEach(btn => {
+                btn.className = "layout-btn p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-800/50 transition";
+            });
+
+            const activeBtn = document.getElementById(`layout-${layout}`);
+            if (activeBtn) {
+                activeBtn.className = "layout-btn p-2 rounded-lg bg-white dark:bg-slate-800 text-brand-500 dark:text-brand-400 shadow-sm transition";
+            }
+            processAndRenderPhotos();
+        }
+
+        // EROR DAN NOTIFIKASI
+        function showError(title, message) {
+            const errAlert = document.getElementById('errorAlert');
+            document.getElementById('errorTitle').textContent = title;
+            document.getElementById('errorMessage').textContent = message;
+            errAlert.classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // LIGHTBOX
+        function openLightbox(index) {
+            state.currentPhotoIndex = index;
+            updateLightboxContent();
+
+            const lightbox = document.getElementById('lightbox');
+            lightbox.classList.remove('hidden');
+            setTimeout(() => {
+                lightbox.classList.remove('opacity-0');
+            }, 50);
+        }
+
+        function closeLightbox() {
+            const lightbox = document.getElementById('lightbox');
+            lightbox.classList.add('opacity-0');
+            setTimeout(() => {
+                lightbox.classList.add('hidden');
+            }, 300);
+        }
+
+        function updateLightboxContent() {
+            const photo = state.filteredPhotos[state.currentPhotoIndex];
+            if (!photo) return;
+
+            const img = document.getElementById('lightboxImg');
+            img.style.transform = 'scale(0.95)';
+            img.src = photo.src;
+            
+            img.onload = () => {
+                img.style.transform = 'scale(1)';
+            };
+
+            document.getElementById('lightboxTitle').textContent = photo.name;
+            document.getElementById('lightboxAspect').textContent = photo.aspect.charAt(0).toUpperCase() + photo.aspect.slice(1);
+            
+            // Set URL salin
+            const dLink = document.getElementById('lightboxDirectLink');
+            dLink.textContent = "Salin Tautan Foto";
+            dLink.onclick = () => {
+                document.execCommand('copy'); // Fallback aman iframe
+                // Menggunakan copy manual clipboard yang didukung luas
+                const tempInput = document.createElement("input");
+                tempInput.value = photo.src;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand("copy");
+                document.body.removeChild(tempInput);
+                showToast("Tautan langsung berhasil disalin!");
+            };
+
+            // Buka Link Drive Asli
+            const driveLinkBtn = document.getElementById('driveLinkBtn');
+            driveLinkBtn.href = photo.webContentLink;
+
+            document.getElementById('lightboxIndex').textContent = state.currentPhotoIndex + 1;
+            document.getElementById('lightboxTotal').textContent = state.filteredPhotos.length;
+        }
+
+        function nextPhoto() {
+            if (state.filteredPhotos.length === 0) return;
+            state.currentPhotoIndex = (state.currentPhotoIndex + 1) % state.filteredPhotos.length;
+            updateLightboxContent();
+        }
+
+        function prevPhoto() {
+            if (state.filteredPhotos.length === 0) return;
+            state.currentPhotoIndex = (state.currentPhotoIndex - 1 + state.filteredPhotos.length) % state.filteredPhotos.length;
+            updateLightboxContent();
+        }
+
+        function setupKeyboardNavigation() {
+            document.addEventListener('keydown', (e) => {
+                const lightbox = document.getElementById('lightbox');
+                if (lightbox.classList.contains('hidden')) return;
+
+                if (e.key === 'ArrowRight') {
+                    nextPhoto();
+                } else if (e.key === 'ArrowLeft') {
+                    prevPhoto();
+                } else if (e.key === 'Escape') {
+                    closeLightbox();
+                }
+            });
+        }
+
+        // PENGATURAN MODAL
+        function openSettings() {
+            const modal = document.getElementById('settingsModal');
+            const content = document.getElementById('settingsContent');
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                content.classList.remove('translate-y-4');
+            }, 50);
+        }
+
+        function closeSettings() {
+            const modal = document.getElementById('settingsModal');
+            const content = document.getElementById('settingsContent');
+
+            modal.classList.add('opacity-0');
+            content.classList.add('translate-y-4');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        function saveSettings() {
+            const folderIdVal = document.getElementById('folderIdInput').value.trim();
+            const isDemoVal = document.getElementById('demoModeToggle').checked;
+
+            if (!folderIdVal) {
+                showToast('ID Folder tidak boleh kosong!');
+                return;
+            }
+
+            state.folderId = folderIdVal;
+            state.isDemo = isDemoVal;
+
+            localStorage.setItem('drive_folder_id', folderIdVal);
+            localStorage.setItem('drive_demo_mode', isDemoVal);
+
+            document.getElementById('currentFolderIdDisplay').textContent = folderIdVal;
+
+            closeSettings();
+            showToast('Pengaturan Folder Berhasil Diperbarui!');
+            loadContent();
+        }
+
+        // TOAST NOTIFIKASI
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').textContent = message;
+            
+            toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+            }, 3000);
+        }
+
+        // CONTROL TEMA GELAP/TERANG
+        function applyTheme() {
+            const html = document.documentElement;
+            const sunIcon = document.getElementById('sunIcon');
+            const moonIcon = document.getElementById('moonIcon');
+
+            if (state.theme === 'dark') {
+                html.classList.add('dark');
+                sunIcon.classList.remove('hidden');
+                moonIcon.classList.add('hidden');
+            } else {
+                html.classList.remove('dark');
+                sunIcon.classList.add('hidden');
+                moonIcon.classList.remove('hidden');
+            }
+        }
+
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            state.theme = state.theme === 'light' ? 'dark' : 'light';
+            localStorage.setItem('drive_theme', state.theme);
+            applyTheme();
+            showToast(`Tema ${state.theme === 'dark' ? 'Gelap' : 'Terang'} Diaktifkan`);
+        });
     </script>
 </body>
 </html>
