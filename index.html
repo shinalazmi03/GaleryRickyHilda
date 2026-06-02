@@ -61,7 +61,7 @@
                 <div>
                     <h1 class="text-xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
                         DriveGallery
-                        <span class="text-xs font-semibold px-2 py-0.5 bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300 rounded-full">v2.0</span>
+                        <span class="text-xs font-semibold px-2 py-0.5 bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300 rounded-full">v2.1</span>
                     </h1>
                     <p class="text-xs text-slate-500 dark:text-slate-400">Pemandang Foto Google Drive Instan</p>
                 </div>
@@ -82,7 +82,7 @@
                 </button>
 
                 <!-- Tombol Konfigurasi API / Settings -->
-                <button id="settingsBtn" class="flex items-center space-x-1.5 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 smooth-transition font-medium text-sm">
+                <button id="settingsBtn" class="flex items-center space-x-1.5 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 smooth-transition font-medium text-sm" title="Ubah Pengaturan Folder">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -100,7 +100,7 @@
             <div class="relative z-10 max-w-2xl">
                 <div class="inline-flex items-center space-x-2 px-3 py-1 bg-white/15 backdrop-blur-md rounded-full text-xs font-semibold tracking-wider uppercase mb-4">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" id="statusBadgeDot"></span>
-                    <span id="statusBadge">Mode Demo Aktif</span>
+                    <span id="statusBadge font-mono">Menghubungkan...</span>
                 </div>
                 <h2 class="text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight">
                     Galeri Gambar Google Drive Anda
@@ -199,7 +199,7 @@
         </div>
 
         <!-- EMPTY STATE / NOTIFIKASI ERROR -->
-        <div id="errorAlert" class="hidden mb-8 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 p-4 rounded-2xl flex items-start space-x-3 text-red-800 dark:text-red-400">
+        <div id="errorAlert" class="hidden mb-8 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 p-4 rounded-2xl flex items-start space-x-3 text-red-800 dark:text-red-400 animate-pulse">
             <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
             </svg>
@@ -384,14 +384,14 @@
 
         // KOLEKSI FOTO DEMO JIKA INGIN DIWARNAI SAMPEL
         const demoPhotos = [
-            { id: 'demo1', name: 'Matahari Terbit di Pegunungan Bromo.jpg', src: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&auto=format&fit=crop&q=80', thumb: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=400&auto=format&fit=crop&q=80', aspect: 'landscape', size: '3.4 MB' },
-            { id: 'demo2', name: 'Suasana Hijau Tebing Danau Toba.jpg', src: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800&auto=format&fit=crop&q=80', thumb: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=400&auto=format&fit=crop&q=80', aspect: 'landscape', size: '2.1 MB' },
-            { id: 'demo3', name: 'Jalur Pedestrian Hutan Bambu.jpg', src: 'https://images.unsplash.com/photo-1500627869374-13cd993b1115?w=800&auto=format&fit=crop&q=80', thumb: 'https://images.unsplash.com/photo-1500627869374-13cd993b1115?w=400&auto=format&fit=crop&q=80', aspect: 'portrait', size: '4.7 MB' },
-            { id: 'demo4', name: 'Keindahan Pantai Pasir Putih Bali.jpg', src: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&auto=format&fit=crop&q=80', thumb: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&auto=format&fit=crop&q=80', aspect: 'landscape', size: '1.8 MB' },
-            { id: 'demo5', name: 'Pohon Pinus di Embun Pagi Bandung.jpg', src: 'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=800&auto=format&fit=crop&q=80', thumb: 'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=400&auto=format&fit=crop&q=80', aspect: 'landscape', size: '3.1 MB' },
-            { id: 'demo6', name: 'Detail Air Terjun Tersembunyi.jpg', src: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&auto=format&fit=crop&q=80', thumb: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&auto=format&fit=crop&q=80', aspect: 'portrait', size: '5.2 MB' },
-            { id: 'demo7', name: 'Sawah Berundak Ubud Bali.jpg', src: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=800&auto=format&fit=crop&q=80', thumb: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=400&auto=format&fit=crop&q=80', aspect: 'portrait', size: '2.8 MB' },
-            { id: 'demo8', name: 'Pesona Alam Pulau Labuan Bajo.jpg', src: 'https://images.unsplash.com/photo-1472214222541-d510753a4707?w=800&auto=format&fit=crop&q=80', thumb: 'https://images.unsplash.com/photo-1472214222541-d510753a4707?w=400&auto=format&fit=crop&q=80', aspect: 'landscape', size: '3.9 MB' }
+            { id: 'demo1', name: 'Matahari Terbit di Pegunungan Bromo.jpg', src: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&auto=format&fit=crop&q=80', thumb: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=400&auto=format&fit=crop&q=80', aspect: 'landscape', size: '3.4 MB', createdTime: new Date().toISOString() },
+            { id: 'demo2', name: 'Suasana Hijau Tebing Danau Toba.jpg', src: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800&auto=format&fit=crop&q=80', thumb: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=400&auto=format&fit=crop&q=80', aspect: 'landscape', size: '2.1 MB', createdTime: new Date().toISOString() },
+            { id: 'demo3', name: 'Jalur Pedestrian Hutan Bambu.jpg', src: 'https://images.unsplash.com/photo-1500627869374-13cd993b1115?w=800&auto=format&fit=crop&q=80', thumb: 'https://images.unsplash.com/photo-1500627869374-13cd993b1115?w=400&auto=format&fit=crop&q=80', aspect: 'portrait', size: '4.7 MB', createdTime: new Date().toISOString() },
+            { id: 'demo4', name: 'Keindahan Pantai Pasir Putih Bali.jpg', src: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&auto=format&fit=crop&q=80', thumb: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&auto=format&fit=crop&q=80', aspect: 'landscape', size: '1.8 MB', createdTime: new Date().toISOString() },
+            { id: 'demo5', name: 'Pohon Pinus di Embun Pagi Bandung.jpg', src: 'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=800&auto=format&fit=crop&q=80', thumb: 'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=400&auto=format&fit=crop&q=80', aspect: 'landscape', size: '3.1 MB', createdTime: new Date().toISOString() },
+            { id: 'demo6', name: 'Detail Air Terjun Tersembunyi.jpg', src: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&auto=format&fit=crop&q=80', thumb: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&auto=format&fit=crop&q=80', aspect: 'portrait', size: '5.2 MB', createdTime: new Date().toISOString() },
+            { id: 'demo7', name: 'Sawah Berundak Ubud Bali.jpg', src: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=800&auto=format&fit=crop&q=80', thumb: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=400&auto=format&fit=crop&q=80', aspect: 'portrait', size: '2.8 MB', createdTime: new Date().toISOString() },
+            { id: 'demo8', name: 'Pesona Alam Pulau Labuan Bajo.jpg', src: 'https://images.unsplash.com/photo-1472214222541-d510753a4707?w=800&auto=format&fit=crop&q=80', thumb: 'https://images.unsplash.com/photo-1472214222541-d510753a4707?w=400&auto=format&fit=crop&q=80', aspect: 'landscape', size: '3.9 MB', createdTime: new Date().toISOString() }
         ];
 
         // INISIALISASI
@@ -414,7 +414,7 @@
             if (savedDemoMode !== null) {
                 state.isDemo = savedDemoMode === 'true';
             } else {
-                // Default memuat berkas real Anda
+                // Default memuat berkas asli milik user
                 state.isDemo = false;
             }
 
@@ -439,7 +439,7 @@
             }
         }
 
-        // AMBIL GAMBAR DARI FOLDER PUBLIK GOOGLE DRIVE TANPA API KEY
+        // AMBIL GAMBAR DARI FOLDER PUBLIK GOOGLE DRIVE TANPA API KEY DENGAN SISTEM FALLBACK MULTI-PROXY
         async function fetchPhotosFromDriveNoKey() {
             const galleryContainer = document.getElementById('galleryContainer');
             const loadingGrid = document.getElementById('loadingGrid');
@@ -450,20 +450,55 @@
             emptyState.classList.add('hidden');
 
             const folderId = state.folderId;
-            // Target halaman embedded view publik
+            // Target halaman embedded view publik Google Drive
             const targetUrl = `https://drive.google.com/embeddedfolderview?id=${folderId}`;
-            // Menggunakan proxy CORS publik AllOrigins yang aman dan andal
-            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+            
+            // Definisikan daftar proxy CORS publik yang aman dan andal
+            const proxies = [
+                {
+                    name: 'CorsProxy.io',
+                    url: `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
+                    handler: async (res) => await res.text()
+                },
+                {
+                    name: 'AllOrigins',
+                    url: `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`,
+                    handler: async (res) => {
+                        const json = await res.json();
+                        return json.contents;
+                    }
+                },
+                {
+                    name: 'CodeTabs',
+                    url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`,
+                    handler: async (res) => await res.text()
+                }
+            ];
+
+            let htmlString = null;
+            let successProxy = '';
+
+            // Lakukan iterasi untuk mencoba setiap proxy secara berurutan hingga berhasil
+            for (const proxy of proxies) {
+                try {
+                    console.log(`Mencoba memuat data folder melalui proxy: ${proxy.name}`);
+                    const response = await fetch(proxy.url);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    
+                    htmlString = await proxy.handler(response);
+                    if (htmlString && htmlString.trim().length > 0) {
+                        successProxy = proxy.name;
+                        console.log(`Sukses memuat halaman melalui proxy ${proxy.name}`);
+                        break; // Hentikan loop jika data berhasil diperoleh
+                    }
+                } catch (err) {
+                    console.warn(`Proxy ${proxy.name} gagal atau diblokir oleh lingkungan browser:`, err);
+                }
+            }
 
             try {
-                const response = await fetch(proxyUrl);
-                if (!response.ok) throw new Error('Gagal menghubungi proxy CORS AllOrigins.');
-                
-                const data = await response.json();
-                const htmlString = data.contents;
-
                 if (!htmlString) {
-                    throw new Error('Tidak ada konten data yang diterima dari proxy.');
+                    throw new Error('Semua proxy CORS publik gagal memuat data. Silakan periksa kembali apakah folder Anda telah disetel ke Publik (Siapa saja yang memiliki link dapat melihat).');
                 }
 
                 const parser = new DOMParser();
@@ -509,7 +544,7 @@
                     });
                 }
 
-                // Metode 3 (Fallback Ekstrim): Mencari kecocokan Array JavaScript di tag script
+                // Metode 3 (Fallback Ekstrim): Mencari kecocokan Array JavaScript di tag script jika HTML dimodifikasi oleh Google
                 if (extractedPhotos.length === 0) {
                     const regex = /"([a-zA-Z0-9_-]{28,35})",\s*"([^"]+)"/g;
                     let match;
@@ -523,18 +558,17 @@
                 }
 
                 if (extractedPhotos.length === 0) {
-                    showError('Folder Tidak Dapat Dibaca', 'Pastikan pengaturan share folder Anda diatur ke "Siapa saja yang memiliki link dapat melihat" dan ID folder sudah benar.');
+                    showError('Folder Kosong atau Tidak Valid', 'Kami berhasil menghubungi Google Drive, namun tidak menemukan berkas gambar publik di dalam folder tersebut.');
                     state.photos = [];
                     emptyState.classList.remove('hidden');
                     return;
                 }
 
-                // Map data hasil ekstraksi ke state
+                // Map data hasil ekstraksi ke state internal
                 state.photos = extractedPhotos.map(photo => {
                     return {
                         id: photo.id,
                         name: photo.name,
-                        // LH3 endpoint ideal: w1200 untuk lightbox jernih, w400 untuk load grid cepat
                         src: `https://lh3.googleusercontent.com/d/${photo.id}=w1200`,
                         thumb: `https://lh3.googleusercontent.com/d/${photo.id}=w400`,
                         aspect: 'landscape', // Dinamis dideteksi saat runtime image load
@@ -544,13 +578,13 @@
                     };
                 });
 
-                document.getElementById('statusBadge').innerHTML = `Terhubung: ${state.photos.length} Foto`;
+                document.getElementById('statusBadge').innerHTML = `Terhubung (${successProxy}): ${state.photos.length} Foto`;
                 document.getElementById('statusBadgeDot').className = "w-2 h-2 rounded-full bg-green-500 animate-pulse";
                 processAndRenderPhotos();
 
             } catch (err) {
                 console.error(err);
-                showError('Koneksi Gagal', 'Sistem tidak dapat mengunduh data folder publik melalui proxy. Coba muat ulang atau periksa status koneksi internet.');
+                showError('Koneksi Gagal', err.message || 'Sistem tidak dapat mengunduh data folder publik melalui proxy CORS. Silakan coba kembali.');
                 state.photos = [];
                 emptyState.classList.remove('hidden');
             } finally {
@@ -749,7 +783,6 @@
             dLink.textContent = "Salin Tautan Foto";
             dLink.onclick = () => {
                 document.execCommand('copy'); // Fallback aman iframe
-                // Menggunakan copy manual clipboard yang didukung luas
                 const tempInput = document.createElement("input");
                 tempInput.value = photo.src;
                 document.body.appendChild(tempInput);
@@ -773,6 +806,7 @@
             updateLightboxContent();
         }
 
+        // NAVIGASI PREVIOUS
         function prevPhoto() {
             if (state.filteredPhotos.length === 0) return;
             state.currentPhotoIndex = (state.currentPhotoIndex - 1 + state.filteredPhotos.length) % state.filteredPhotos.length;
